@@ -103,14 +103,14 @@ use Omnipay\Common\CreditCard;
  * $transaction->setSslResultFormat('ASCII');
  * </code>
  *
- * @link https://www.myvirtualmerchant.com/VirtualMerchant/
+ * @link https://api.convergepay.com/VirtualMerchant/
  * @link https://resourcecentre.elavonpaymentgateway.com/index.php/download-developer-guide
  * @see \Omnipay\Elavon\ConvergeGateway
  */
 abstract class ConvergeAbstractRequest extends \Omnipay\Common\Message\AbstractRequest
 {
-    protected $testEndpoint = 'https://demo.myvirtualmerchant.com/VirtualMerchantDemo';
-    protected $liveEndpoint = 'https://www.myvirtualmerchant.com/VirtualMerchant';
+    protected $testEndpoint = 'https://api.demo.convergepay.com/VirtualMerchantDemo';
+    protected $liveEndpoint = 'https://api.convergepay.com/VirtualMerchant';
 
     public function getEndpoint()
     {
@@ -345,12 +345,10 @@ abstract class ConvergeAbstractRequest extends \Omnipay\Common\Message\AbstractR
     protected function getBaseData()
     {
         $data = array(
-            'ssl_merchant_id' => $this->getMerchantId(),
+            'ssl_account_id' => $this->getMerchantId(),
             'ssl_user_id' => $this->getUsername(),
             'ssl_pin' => $this->getPassword(),
             'ssl_test_mode' => ($this->getTestMode() && !$this->getIntegrationTesting()) ? 'true' : 'false',
-            'ssl_show_form' => ($this->getSslShowForm() && ($this->getSslShowForm() != 'false')) ? 'true' : 'false',
-            'ssl_result_format' => $this->getSslResultFormat(),
             'ssl_invoice_number' => $this->getSslInvoiceNumber(),
         );
 
@@ -359,10 +357,36 @@ abstract class ConvergeAbstractRequest extends \Omnipay\Common\Message\AbstractR
 
     public function sendData($data)
     {
-        $httpResponse = $this->httpClient->request('POST', $this->getEndpoint() . '/process.do', [
+        $xml = new \DOMDocument('1.0', 'UTF-8');
+        $transaction = $xml->appendChild($xml->createElement('txn'));
+        foreach ($data as $name => $value) {
+            if ($value === null) {
+                continue;
+            }
+            $element = $transaction->appendChild($xml->createElement($name));
+            $element->appendChild($xml->createTextNode((string) $value));
+        }
+
+        $httpResponse = $this->httpClient->request('POST', $this->getEndpoint() . '/processxml.do', array(
             'Content-Type' => 'application/x-www-form-urlencoded',
-        ], http_build_query($data));
+        ), http_build_query(array('xmldata' => $xml->saveXML($transaction)), '', '&', PHP_QUERY_RFC3986));
 
         return $this->createResponse($httpResponse->getBody()->getContents());
+    }
+
+    /**
+     * Add the optional cardholder IP to customer-initiated requests only.
+     */
+    protected function withCardholderIp(array $data)
+    {
+        $ip = $this->getClientIp();
+        if ($ip !== null && $ip !== '') {
+            if (!is_string($ip) || strlen($ip) > 40 || filter_var($ip, FILTER_VALIDATE_IP) === false) {
+                throw new \Omnipay\Common\Exception\InvalidRequestException('Invalid cardholder IP address.');
+            }
+            $data['ssl_cardholder_ip'] = $ip;
+        }
+
+        return $data;
     }
 }

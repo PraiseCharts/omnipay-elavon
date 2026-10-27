@@ -5,9 +5,4 @@ Content-Length: 214
 Connection: close
 Content-Type: text/plain; charset=utf-8
 
-ssl_status=TEST MODE
-ssl_result=0
-ssl_token=7595301425001111
-ssl_card_number=41**********1111
-ssl_token_response=SUCCESS
-ssl_add_token_response=Card Updated
+<txn><ssl_status>TEST MODE</ssl_status><ssl_result>0</ssl_result><ssl_token>7595301425001111</ssl_token><ssl_card_number>41**********1111</ssl_card_number><ssl_token_response>SUCCESS</ssl_token_response><ssl_add_token_response>Card Updated</ssl_add_token_response></txn>

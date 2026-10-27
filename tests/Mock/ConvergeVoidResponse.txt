@@ -5,9 +5,4 @@ Content-Length: 214
 Connection: close
 Content-Type: text/plain; charset=utf-8
 
-ssl_invoice_number=1
-ssl_result=0
-ssl_result_message=APPROVED
-ssl_txn_id=00000000-0000-0000-0000-00000000000
-ssl_approval_code=123456
-ssl_txn_time=05/13/2015 07:50:40 PM
+<txn><ssl_invoice_number>1</ssl_invoice_number><ssl_result>0</ssl_result><ssl_result_message>APPROVED</ssl_result_message><ssl_txn_id>00000000-0000-0000-0000-00000000000</ssl_txn_id><ssl_approval_code>123456</ssl_approval_code><ssl_txn_time>05/13/2015 07:50:40 PM</ssl_txn_time></txn>

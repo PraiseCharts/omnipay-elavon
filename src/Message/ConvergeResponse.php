@@ -10,12 +10,42 @@ class ConvergeResponse extends AbstractResponse
     public function __construct(RequestInterface $request, $data)
     {
         $this->request = $request;
-        parse_str(implode('&', preg_split('/\n/', $data)), $this->data);
+        // Never expand entities, load a DTD, or include gateway payloads in errors.
+        if (!is_string($data) || trim($data) === '' || preg_match('/<!DOCTYPE|<!ENTITY/i', $data)) {
+            throw new \Omnipay\Common\Exception\InvalidResponseException('Invalid Converge XML response.');
+        }
+        $previous = libxml_use_internal_errors(true);
+        try {
+            $xml = new \DOMDocument();
+            if (!$xml->loadXML($data, LIBXML_NONET)
+                || !$xml->documentElement
+                || $xml->documentElement->tagName !== 'txn'
+            ) {
+                throw new \Omnipay\Common\Exception\InvalidResponseException('Invalid Converge XML response.');
+            }
+            $this->data = array();
+            foreach ($xml->documentElement->childNodes as $element) {
+                if (!$element instanceof \DOMElement) {
+                    continue;
+                }
+                if (array_key_exists($element->tagName, $this->data)
+                    || $element->getElementsByTagName('*')->length
+                ) {
+                    throw new \Omnipay\Common\Exception\InvalidResponseException('Invalid Converge XML response.');
+                }
+                $this->data[$element->tagName] = $element->textContent;
+            }
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+        }
     }
 
     public function isSuccessful()
     {
-        return (isset($this->data['ssl_result']) && $this->data['ssl_result'] == 0);
+        return !isset($this->data['errorCode'])
+            && isset($this->data['ssl_result'])
+            && $this->data['ssl_result'] === '0';
     }
 
     public function getTransactionReference()
@@ -38,7 +68,7 @@ class ConvergeResponse extends AbstractResponse
             return $this->data['errorCode'];
         }
 
-        return $this->data['ssl_result'];
+        return isset($this->data['ssl_result']) ? $this->data['ssl_result'] : null;
     }
 
     /**

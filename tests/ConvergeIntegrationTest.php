@@ -35,7 +35,7 @@ class ConvergeIntegrationTest extends TestCase
      * Check the myCredentials file to make sure it exists and has the needed data. If there are any problems skip the tests.
      * If there are not, instantiate the object.
      */
-    public function setUp()
+    public function setUp(): void
     {
         $merchantId = '';
         $username = '';

@@ -132,8 +132,6 @@ class ConvergeAuthorizeRequest extends ConvergeAbstractRequest
                 $this->validate('amount');
 
                 $data = array(
-                    'ssl_show_form' => 'false',
-                    'ssl_result_format' => 'ASCII',
                     'ssl_amount' => $this->getAmount(),
                     'ssl_salestax' => $this->getSslSalesTax(),
                     'ssl_transaction_type' => $this->transactionType,
@@ -142,6 +140,6 @@ class ConvergeAuthorizeRequest extends ConvergeAbstractRequest
                 );
         }
 
-        return array_merge($this->getBaseData(), $data);
+        return $this->withCardholderIp(array_merge($this->getBaseData(), $data));
     }
 }
