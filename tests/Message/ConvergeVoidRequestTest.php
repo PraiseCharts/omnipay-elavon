@@ -10,7 +10,7 @@ class ConvergeVoidRequestTest extends TestCase
     /** @var  ConvergeVoidRequest */
     protected $request;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->request = new ConvergeVoidRequest($this->getHttpClient(), $this->getHttpRequest());
         $this->request->initialize(

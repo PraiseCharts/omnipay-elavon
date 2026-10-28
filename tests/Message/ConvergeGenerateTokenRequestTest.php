@@ -4,7 +4,7 @@ use Omnipay\Tests\TestCase;
 
 class ConvergeGenerateTokenRequestTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         $this->request = new ConvergeGenerateTokenRequest($this->getHttpClient(), $this->getHttpRequest());
         $this->request->initialize(

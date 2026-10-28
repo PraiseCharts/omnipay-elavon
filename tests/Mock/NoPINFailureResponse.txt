@@ -5,7 +5,4 @@ Content-Length: 214
 Connection: close
 Content-Type: text/plain; charset=utf-8
 
-errorCode=4013
-errorName=PIN Not Supplied
-errorMessage=The PIN was not supplied in the authorization request.
-ssl_status=TEST MODE
+<txn><errorCode>4013</errorCode><errorName>PIN Not Supplied</errorName><errorMessage>The PIN was not supplied in the authorization request.</errorMessage><ssl_status>TEST MODE</ssl_status></txn>

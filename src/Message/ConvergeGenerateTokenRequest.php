@@ -128,10 +128,8 @@ class ConvergeGenerateTokenRequest extends ConvergeAbstractRequest
             'ssl_country' => $this->getCard()->getCountry(),
             'ssl_add_token' => 'Y',
 
-            'ssl_show_form' => 'false',
-            'ssl_result_format' => 'ASCII',
         );
 
-        return array_merge($this->getBaseData(), $data);
+        return $this->withCardholderIp(array_merge($this->getBaseData(), $data));
     }
 }

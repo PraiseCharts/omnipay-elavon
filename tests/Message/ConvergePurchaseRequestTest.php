@@ -4,7 +4,7 @@ use Omnipay\Tests\TestCase;
 
 class ConvergePurchaseRequestTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         $this->request = new ConvergePurchaseRequest($this->getHttpClient(), $this->getHttpRequest());
         $this->request->initialize(
@@ -34,13 +34,13 @@ class ConvergePurchaseRequestTest extends TestCase
     public function testGetTestEndpoint()
     {
         $this->assertSame($this->request, $this->request->setTestMode(true));
-        $this->assertSame('https://demo.myvirtualmerchant.com/VirtualMerchantDemo', $this->request->getEndpoint());
+        $this->assertSame('https://api.demo.convergepay.com/VirtualMerchantDemo', $this->request->getEndpoint());
     }
 
     public function testGetLiveEndpoint()
     {
         $this->assertSame($this->request, $this->request->setTestMode(false));
-        $this->assertSame('https://www.myvirtualmerchant.com/VirtualMerchant', $this->request->getEndpoint());
+        $this->assertSame('https://api.convergepay.com/VirtualMerchant', $this->request->getEndpoint());
     }
 
     public function testGetData()
@@ -49,8 +49,8 @@ class ConvergePurchaseRequestTest extends TestCase
         $this->assertSame('10.00', (string) $data['ssl_amount']);
         $this->assertSame('1.23', (string) $data['ssl_salestax']);
         $this->assertSame('1', (string) $data['ssl_invoice_number']);
-        $this->assertSame('false', $data['ssl_show_form']);
-        $this->assertSame('ASCII', $data['ssl_result_format']);
+        $this->assertArrayNotHasKey('ssl_show_form', $data);
+        $this->assertArrayNotHasKey('ssl_result_format', $data);
         $this->assertSame('ccsale', $data['ssl_transaction_type']);
     }
 
