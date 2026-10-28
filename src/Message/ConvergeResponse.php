@@ -18,6 +18,7 @@ class ConvergeResponse extends AbstractResponse
         try {
             $xml = new \DOMDocument();
             if (!$xml->loadXML($data, LIBXML_NONET)
+                || $xml->doctype !== null
                 || !$xml->documentElement
                 || $xml->documentElement->tagName !== 'txn'
             ) {

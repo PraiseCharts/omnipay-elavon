@@ -128,6 +128,38 @@ class ConvergeXmlTransportTest extends TestCase
         ];
     }
 
+    /** @dataProvider responseEncodings */
+    public function testDoctypeIsRejectedRegardlessOfXmlEncoding($encoding, $doctype, $message)
+    {
+        $body = '<?xml version="1.0" encoding="' . $encoding . '"?>' . $doctype .
+            '<txn><ssl_result>0</ssl_result><ssl_result_message>' . $message . '</ssl_result_message></txn>';
+        $body = mb_convert_encoding($body, $encoding, 'UTF-8');
+        $request = (new ConvergeGateway())->purchase(['amount' => '1.00', 'cardReference' => 'token-1']);
+        $this->expectException(InvalidResponseException::class);
+        $this->expectExceptionMessage('Invalid Converge XML response.');
+        new ConvergeResponse($request, $body);
+    }
+
+    public static function responseEncodings()
+    {
+        foreach (['UTF-8', 'UTF-16LE', 'UTF-16BE'] as $encoding) {
+            yield [$encoding, '<!DOCTYPE txn [<!ENTITY approval "APPROVAL">]>', '&approval;'];
+            yield [$encoding, '<!DOCTYPE txn SYSTEM "file:///nonexistent-converge-response.dtd">', 'APPROVAL'];
+        }
+    }
+
+    public function testValidUtf16ResponsesRemainSupported()
+    {
+        $request = (new ConvergeGateway())->purchase(['amount' => '1.00', 'cardReference' => 'token-1']);
+        foreach (['UTF-16LE', 'UTF-16BE'] as $encoding) {
+            $body = '<?xml version="1.0" encoding="' . $encoding . '"?>' .
+                '<txn><ssl_result>0</ssl_result><ssl_result_message>APPROVAL</ssl_result_message></txn>';
+            $response = new ConvergeResponse($request, mb_convert_encoding($body, $encoding, 'UTF-8'));
+            $this->assertTrue($response->isSuccessful());
+            $this->assertSame('APPROVAL', $response->getMessage());
+        }
+    }
+
     public function testResponsePreservesStringsAndDecodedSpecialCharacters()
     {
         $request = (new ConvergeGateway())->createCard(['card' => self::card()]);
